@@ -2,141 +2,71 @@ package com.tictactoebotapi.TicTacToeBotAPI.service;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 @Service
 public class BotService {
-    public int makeMove(String[] board) {
-        char botSymbol = 'O';
-        int move = -1; // the move that the bot will make
-        int n = board.length; // the size of the board
+    public static int getBotMove(String[] board) {
+        int move = -1; // The bot's move
 
-        // check if the bot can win on the next move
-        for (int i = 0; i < n; i++) {
-            if (board[i].charAt(0) == botSymbol) {
-                // check row
-                int row = i / n;
-                int col = i % n;
-                boolean canWin = true;
-                for (int j = 0; j < n; j++) {
-                    if (board[row * n + j].charAt(0) != botSymbol) {
-                        canWin = false;
-                        break;
-                    }
+        // Check if there is a winning move for the bot
+        for (int i = 0; i < 9; i++) {
+            if (board[i].equals("")) { // Check for empty string instead of null
+                board[i] = "O"; // Assume the bot is "O"
+                if (checkWin(board, "O")) {
+                    move = i;
+                    board[i] = ""; // Undo the move
+                    return move;
                 }
-                if (canWin) {
-                    move = row * n + col;
-                    break;
-                }
-
-                // check column
-                canWin = true;
-                for (int j = 0; j < n; j++) {
-                    if (board[j * n + col].charAt(0) != botSymbol) {
-                        canWin = false;
-                        break;
-                    }
-                }
-                if (canWin) {
-                    move = row * n + col;
-                    break;
-                }
-
-                // check diagonal
-                if (row == col) {
-                    canWin = true;
-                    for (int j = 0; j < n; j++) {
-                        if (board[j * n + j].charAt(0) != botSymbol) {
-                            canWin = false;
-                            break;
-                        }
-                    }
-                    if (canWin) {
-                        move = row * n + col;
-                        break;
-                    }
-                }
-
-                // check anti-diagonal
-                if (row == n - col - 1) {
-                    canWin = true;
-                    for (int j = 0; j < n; j++) {
-                        if (board[j * n + (n - j - 1)].charAt(0) != botSymbol) {
-                            canWin = false;
-                            break;
-                        }
-                    }
-                    if (canWin) {
-                        move = row * n + col;
-                        break;
-                    }
-                }
+                board[i] = ""; // Undo the move
             }
         }
 
-        // if the bot can't win on the next move, try to block the opponent
-        if (move == -1) {
-            char opponentSymbol = botSymbol == 'X' ? 'O' : 'X';
-            for (int i = 0; i < n; i++) {
-                if (board[i].charAt(0) == opponentSymbol) {
-                    // check row
-                    int row = i / n;
-                    int col = i % n;
-                    boolean canBlock = true;
-                    for (int j = 0; j < n; j++) {
-                        if (board[row * n + j].charAt(0) != opponentSymbol) {
-                            canBlock = false;
-                            break;
-                        }
-                    }
-                    if (canBlock) {
-                        move = row * n + col;
-                        break;
-                    }
-
-                    // check diagonal
-                    if (row == col) {
-                        canBlock = true;
-                        for (int j = 0; j < n; j++) {
-                            if (board[j * n + j].charAt(0) != opponentSymbol) {
-                                canBlock = false;
-                                break;
-                            }
-                        }
-                        if (canBlock) {
-                            move = row * n + col;
-                            break;
-                        }
-                    }
-
-                    // check anti-diagonal
-                    if (row == n - col - 1) {
-                        canBlock = true;
-                        for (int j = 0; j < n; j++) {
-                            if (board[j * n + (n - j - 1)].charAt(0) != opponentSymbol) {
-                                canBlock = false;
-                                break;
-                            }
-                        }
-                        if (canBlock) {
-                            move = row * n + col;
-                            break;
-                        }
-                    }
+        // Check if there is a winning move for the player
+        for (int i = 0; i < 9; i++) {
+            if (board[i].equals("")) { // Check for empty string instead of null
+                board[i] = "X"; // Assume the player is "X"
+                if (checkWin(board, "X")) {
+                    move = i;
+                    board[i] = ""; // Undo the move
+                    return move;
                 }
+                board[i] = ""; // Undo the move
             }
         }
 
-        // if the bot can't win or block, make a random move
-        if (move == -1) {
-            Random rand = new Random();
-            do {
-                move = rand.nextInt(n * n);
-            } while (board[move].charAt(0) != ' ');
-        }
-
+        // Make a random move
+        Random rand = new Random();
+        do {
+            move = rand.nextInt(9);
+        } while (!board[move].equals(""));
         return move;
     }
 
+    // Helper method to check if a player has won
+    public static boolean checkWin(String[] board, String player) {
+        // Check rows
+        for (int i = 0; i < 9; i += 3) {
+            if (board[i].equals(player) && board[i+1].equals(player) && board[i+2].equals(player)) {
+                return true;
+            }
+        }
+        // Check columns
+        for (int i = 0; i < 3; i++) {
+            if (board[i].equals(player) && board[i+3].equals(player) && board[i+6].equals(player)) {
+                return true;
+            }
+        }
+        // Check diagonals
+        if (board[0].equals(player) && board[4].equals(player) && board[8].equals(player)) {
+            return true;
+        }
+        if (board[2].equals(player) && board[4].equals(player) && board[6].equals(player)) {
+            return true;
+        }
+        return false;
+    }
     }
 
 

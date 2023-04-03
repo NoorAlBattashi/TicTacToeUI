@@ -15,24 +15,27 @@ const winConditions = [
 let options =["", "", "", "", "", "", "", "", ""];
 let currentPlayer = "X";
 let running = false;
+    
 
-//write all the functions
+//Start the game
 initializeGame();
 
+//write all the functions
 function initializeGame(){
     cells.forEach(cell => cell.addEventListener("click", cellClicked));
     restartBtn.addEventListener("click", restartGame);
     statusText.textContent = `${currentPlayer}'s turn`;
     running = true;
 }
-function cellClicked(){
+function cellClicked() {
     const cellIndex = this.getAttribute("cellIndex");
-    if(options[cellIndex] != "" || !running){
-        return;
+    if (options[cellIndex] != "" || !running) {
+      return;
     }
     updateCell(this, cellIndex);
     checkWinner();
-}
+    bot(); // add this line to call the bot function
+  }
 function updateCell(cell, index){
     options[index] = currentPlayer;
     cell.textContent = currentPlayer;
@@ -40,6 +43,7 @@ function updateCell(cell, index){
 function changePlayer(){
     currentPlayer = (currentPlayer == "X")? "O":"X";
     statusText.textContent = `${currentPlayer}'s turn`;
+
 }
 function checkWinner(){
     let roundWon = false;
@@ -77,3 +81,25 @@ function restartGame(){
     cells.forEach(cell => cell.textContent = "");
     running = true;
 }
+const bot = () => {
+    let url = "http://localhost:8080/api/bot";
+    reqConfig = {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json;charset=UTF-8",
+        "Authorization": "Basic YWRtaW46MTIz"
+    },
+      body: JSON.stringify(options),
+    };
+    fetch(url, reqConfig)
+      .then((response) => {
+        return response.json();
+      })
+      .then((parsedResponse) => {
+        const botMove = parsedResponse.botMove;
+        const cellIndex = botMove;
+        const cell = document.querySelector(`[cellIndex="${cellIndex}"]`);
+       updateCell(cell, cellIndex);
+       checkWinner();
+      });
+  };
